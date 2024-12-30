@@ -93,7 +93,7 @@ async def monitor_updates():
                     f"🔹 <b>Name:</b> {token_name}\n"
                     f"🔹 <b>Chain:</b> {token_chain}\n"
                     f"🔹 <b>Address:</b> <code>{token_address}</code>\n"
-                    f"🔗 <b>Telegram:</b> <a href='{telegram_link}'>Join Community</a>\n"
+                    f"🔗 <b>Telegram:</b> <a href='{telegram_link}'>{telegram_link}</a>\n"
                 )
                 if website_link:
                     message += f"🌐 <b>Website:</b> <a href='{website_link}'>Visit Website</a>\n"
