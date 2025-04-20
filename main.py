@@ -70,6 +70,20 @@ async def monitor_updates():
                 # Enhanced token name extraction with more fallback options
                 # Try all possible locations for the token name
                 token_name = token.get("name", "Unknown Token")
+                token_address = token.get("tokenAddress", "N/A")
+                token_chain = token.get("chainId", "N/A")
+                
+                # Debug print - log the token structure to understand its format
+                if token_name == "Unknown Token":
+                    print(f"DEBUG - Token with unknown name detected")
+                    print(f"Token address: {token_address}")
+                    print(f"Token fields: {', '.join(token.keys())}")
+                    # Log first level of nested objects to avoid overwhelming output
+                    for key, value in token.items():
+                        if isinstance(value, dict):
+                            print(f"  {key} contains: {', '.join(value.keys())}")
+                        elif isinstance(value, list) and len(value) > 0:
+                            print(f"  {key} is a list with {len(value)} items")
                 
                 # Checking all possible paths for token name
                 if token_name == "Unknown Token":
@@ -111,21 +125,6 @@ async def monitor_updates():
                         if valid_path and current:
                             token_name = current
                             break
-                
-                # Debug print - log the token structure to understand its format
-                if token_name == "Unknown Token":
-                    print(f"DEBUG - Token with unknown name detected")
-                    print(f"Token address: {token_address}")
-                    print(f"Token fields: {', '.join(token.keys())}")
-                    # Log first level of nested objects to avoid overwhelming output
-                    for key, value in token.items():
-                        if isinstance(value, dict):
-                            print(f"  {key} contains: {', '.join(value.keys())}")
-                        elif isinstance(value, list) and len(value) > 0:
-                            print(f"  {key} is a list with {len(value)} items")
-                
-                token_address = token.get("tokenAddress", "N/A")
-                token_chain = token.get("chainId", "N/A")
                 
                 # Get links
                 links = token.get("links", [])
