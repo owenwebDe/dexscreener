@@ -66,15 +66,27 @@ async def monitor_updates():
 
         if data:
             for token in data:
+                # Fixed: Correct way to access token properties
                 token_name = token.get("name", "Unknown Token")
+                # Try alternate naming conventions if the main name is missing
+                if token_name == "Unknown Token":
+                    token_name = token.get("tokenName", "Unknown Token")
+                if token_name == "Unknown Token" and "baseTokenInfo" in token:
+                    token_name = token.get("baseTokenInfo", {}).get("name", "Unknown Token")
+                if token_name == "Unknown Token" and "profile" in token:
+                    token_name = token.get("profile", {}).get("name", "Unknown Token")
+                
                 token_address = token.get("tokenAddress", "N/A")
                 token_chain = token.get("chainId", "N/A")
+                
+                # Get links
+                links = token.get("links", [])
                 telegram_link = next(
-                    (link["url"] for link in token.get("links", []) if "t.me" in link.get("url", "")), 
+                    (link["url"] for link in links if "t.me" in link.get("url", "")), 
                     None
                 )
                 website_link = next(
-                    (link["url"] for link in token.get("links", []) if "http" in link.get("url", "") and "t.me" not in link.get("url", "")), 
+                    (link["url"] for link in links if "http" in link.get("url", "") and "t.me" not in link.get("url", "")), 
                     None
                 )
                 dexscreener_link = token.get("url", None)
@@ -87,18 +99,23 @@ async def monitor_updates():
                     print(f"Skipping {token_name} (already notified).")
                     continue
 
-                # Format the notification message
+                # Format the notification message with beautiful styling
                 message = (
-                    f"🚀 <b>New Token Alert!</b>\n"
-                    f"🔹 <b>Name:</b> {token_name}\n"
-                    f"🔹 <b>Chain:</b> {token_chain}\n"
-                    f"🔹 <b>Address:</b> <code>{token_address}</code>\n"
-                    f"🔗 <b>Telegram:</b> <a href='{telegram_link}'>{telegram_link}</a>\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━\n"
+                    f"🚀 <b>NEW TOKEN DETECTED!</b> 🚀\n"
+                    f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+                    f"💎 <b>Token:</b> <code>{token_name}</code>\n"
+                    f"⛓️ <b>Network:</b> <code>{token_chain}</code>\n"
+                    f"📝 <b>Contract:</b>\n<code>{token_address}</code>\n\n"
+                    f"📱 <b>Community:</b>\n<a href='{telegram_link}'>Telegram Group</a>\n"
                 )
                 if website_link:
-                    message += f"🌐 <b>Website:</b> <a href='{website_link}'>Visit Website</a>\n"
+                    message += f"🌐 <b>Website:</b>\n<a href='{website_link}'>Official Website</a>\n"
                 if dexscreener_link:
-                    message += f"📊 <b>DEX Screener:</b> <a href='{dexscreener_link}'>View on DEX Screener</a>\n"
+                    message += f"\n📊 <a href='{dexscreener_link}'><b>View Chart on DEXScreener</b></a>\n"
+                
+                # Add a footer
+                message += f"\n━━━━━━━━━━━━━━━━━━━━━\n⏰ <i>Detected at: {time.strftime('%Y-%m-%d %H:%M:%S UTC')}</i>"
 
                 # Send the message
                 print(f"Sending message for token: {token_name}")
