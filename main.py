@@ -2,6 +2,7 @@ import requests
 import json
 import asyncio
 import time
+import pprint
 from telegram import Bot
 
 # Constants
@@ -66,15 +67,62 @@ async def monitor_updates():
 
         if data:
             for token in data:
-                # Fixed: Correct way to access token properties
+                # Enhanced token name extraction with more fallback options
+                # Try all possible locations for the token name
                 token_name = token.get("name", "Unknown Token")
-                # Try alternate naming conventions if the main name is missing
+                
+                # Checking all possible paths for token name
                 if token_name == "Unknown Token":
-                    token_name = token.get("tokenName", "Unknown Token")
-                if token_name == "Unknown Token" and "baseTokenInfo" in token:
-                    token_name = token.get("baseTokenInfo", {}).get("name", "Unknown Token")
-                if token_name == "Unknown Token" and "profile" in token:
-                    token_name = token.get("profile", {}).get("name", "Unknown Token")
+                    # Try direct alternative field names
+                    alt_fields = ["tokenName", "symbol", "baseSymbol", "ticker"]
+                    for field in alt_fields:
+                        if field in token and token[field]:
+                            token_name = token[field]
+                            break
+                
+                # Try nested objects if still Unknown
+                if token_name == "Unknown Token":
+                    # Check nested objects
+                    nested_paths = [
+                        ("baseTokenInfo", "name"),
+                        ("tokenInfo", "name"),
+                        ("profile", "name"),
+                        ("token", "name"),
+                        ("baseToken", "name"),
+                        ("dexScreener", "name"),
+                        ("pairInfo", "baseToken", "name"),
+                        ("pairData", "baseToken", "name"),
+                        ("baseToken", "symbol"),
+                        ("tokenInfo", "symbol")
+                    ]
+                    
+                    for path in nested_paths:
+                        # Navigate the nested path
+                        current = token
+                        valid_path = True
+                        
+                        for key in path:
+                            if isinstance(current, dict) and key in current:
+                                current = current[key]
+                            else:
+                                valid_path = False
+                                break
+                        
+                        if valid_path and current:
+                            token_name = current
+                            break
+                
+                # Debug print - log the token structure to understand its format
+                if token_name == "Unknown Token":
+                    print(f"DEBUG - Token with unknown name detected")
+                    print(f"Token address: {token_address}")
+                    print(f"Token fields: {', '.join(token.keys())}")
+                    # Log first level of nested objects to avoid overwhelming output
+                    for key, value in token.items():
+                        if isinstance(value, dict):
+                            print(f"  {key} contains: {', '.join(value.keys())}")
+                        elif isinstance(value, list) and len(value) > 0:
+                            print(f"  {key} is a list with {len(value)} items")
                 
                 token_address = token.get("tokenAddress", "N/A")
                 token_chain = token.get("chainId", "N/A")
