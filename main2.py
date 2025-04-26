@@ -196,27 +196,21 @@ async def monitor_updates():
                             # Add a concise header and token info
                             message += (
                                 f"\n\n<b>🔔 NEW TOKEN: {token_name}</b>\n"
-                                f"<b>⛓️ {token_chain.upper()}</b>\n\n"
+                                f"<b>⛓️ {token_chain.upper()}</b> | "
                             )
                             
-                            # Add links section with clear labels
-                            links_section = ""
+                            # Add links in a compact horizontal format
                             if telegram_link:
-                                links_section += f"<b>📱 Telegram:</b> <a href='{telegram_link}'>Join Group</a>\n"
+                                message += f"<a href='{telegram_link}'>📱</a> "
                             if twitter_link:
-                                links_section += f"<b>🐦 Twitter:</b> <a href='{twitter_link}'>Follow</a>\n"
+                                message += f"<a href='{twitter_link}'>🐦</a> "
                             if website_link:
-                                links_section += f"<b>🌐 Website:</b> <a href='{website_link}'>Visit</a>\n"
-                            
-                            if links_section:
-                                message += links_section + "\n"
-                            
-                            # Add contract address
-                            message += f"<b>📝 Contract:</b>\n<code>{token_address}</code>\n\n"
-                            
-                            # Add chart link with clear label
+                                message += f"<a href='{website_link}'>🌐</a> "
                             if dexscreener_link:
-                                message += f"<b>📊 Chart:</b> <a href='{dexscreener_link}'>View on DEXScreener</a>\n\n"
+                                message += f"<a href='{dexscreener_link}'>📊</a> "
+                            
+                            # Add contract and brief description
+                            message += f"\n\n<code>{token_address}</code>"
                             
                             # Add a very brief description if available (just first 100 chars)
                             if token_description:
