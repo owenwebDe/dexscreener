@@ -9,7 +9,7 @@ from telegram import Bot
 DEX_API_URL = "https://api.dexscreener.com/token-profiles/latest/v1"
 NOTIFIED_TOKENS_FILE = "notified_tokens.json"
 CHECK_INTERVAL = 60  # Check every 60 seconds
-BOT_TOKEN = "7682084938:AAFVo5qUxqK9nbAjdrJHzaiUl66iUeDFw1o"
+BOT_TOKEN = "8109255320:AAHLMFX-49cagRMCktYJXXwr2zFDkCmGggw"
 CHAT_ID = "-1002320564236"
 
 # Initialize Telegram bot
