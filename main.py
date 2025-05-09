@@ -3,7 +3,7 @@ import json
 import asyncio
 import time
 import traceback
-from telegram import Bot
+from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 
 # Constants
 DEX_API_URL = "https://api.dexscreener.com/token-profiles/latest/v1"
@@ -11,6 +11,7 @@ NOTIFIED_TOKENS_FILE = "notified_tokens.json"
 CHECK_INTERVAL = 60  # Check every 60 seconds
 BOT_TOKEN = "8109255320:AAHLMFX-49cagRMCktYJXXwr2zFDkCmGggw"
 CHAT_ID = "-1002320564236"
+BOOST_BOT_URL = "https://t.me/DexsBoostsBot"  # Your boost bot URL
 
 # Initialize Telegram bot
 bot = Bot(token=BOT_TOKEN)
@@ -65,13 +66,34 @@ def fetch_latest_tokens():
     print("All fetch attempts failed")
     return None
 
-# Send Telegram message
-async def send_telegram_message(message):
+# Create boost button for each token message
+def create_boost_button(token_address, token_chain):
+    # Create an inline keyboard with a single button
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(
+            text="🚀 BOOST THIS TOKEN 🚀", 
+            url=f"{BOOST_BOT_URL}?start=boost_{token_chain}_{token_address}")
+        ]
+    ])
+    return keyboard
+
+# Send Telegram message with boost button
+async def send_telegram_message(message, token_address, token_chain):
     retries = 3
     for attempt in range(retries):
         try:
-            await bot.send_message(chat_id=CHAT_ID, text=message, parse_mode="HTML")
-            print("Message sent successfully!")
+            # Create the boost button
+            reply_markup = create_boost_button(token_address, token_chain)
+            
+            # Send message with button
+            await bot.send_message(
+                chat_id=CHAT_ID, 
+                text=message, 
+                parse_mode="HTML", 
+                reply_markup=reply_markup,
+                disable_web_page_preview=False
+            )
+            print("Message sent successfully with boost button!")
             return True
         except Exception as e:
             print(f"Failed to send message: {e}. Retry {attempt + 1}/{retries}")
@@ -224,9 +246,9 @@ async def monitor_updates():
                                 if len(short_desc) > 0:
                                     message += f"\n\n<i>{short_desc}...</i>"
 
-                            # Send the message
+                            # Send the message with boost button
                             print(f"Sending message for token: {token_name} ({token_chain})")
-                            send_success = await send_telegram_message(message)
+                            send_success = await send_telegram_message(message, token_address, token_chain)
 
                             if send_success:
                                 # Only add to notified list if the message was successfully sent
